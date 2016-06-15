@@ -408,7 +408,7 @@ public class PDFView extends SurfaceView {
         cacheManager.recycle();
 
         if (pdfiumCore != null && pdfDocument != null) {
-            pdfiumCore.closeDocument(pdfDocument);
+//            pdfiumCore.closeDocument(pdfDocument);
         }
         openedPages.clear();
 
