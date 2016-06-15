@@ -1265,6 +1265,7 @@ public class PDFView extends SurfaceView {
         }
 
         public void load() {
+            renderingAsyncTask.removeAllTasks();
             PDFView.this.recycle();
             PDFView.this.setOnDrawListener(onDrawListener);
             PDFView.this.setOnPageChangeListener(onPageChangeListener);
