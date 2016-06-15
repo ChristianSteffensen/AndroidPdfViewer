@@ -418,7 +418,13 @@ public class PDFView extends SurfaceView {
 
     @Override
     protected void onDetachedFromWindow() {
-        recycle();
+        if (renderingAsyncTask != null) {
+            renderingAsyncTask.cancel(true);
+        }
+        if (decodingAsyncTask != null) {
+            decodingAsyncTask.cancel(true);
+        }
+
         super.onDetachedFromWindow();
     }
 
@@ -1265,9 +1271,6 @@ public class PDFView extends SurfaceView {
         }
 
         public void load() {
-            if(renderingAsyncTask != null){
-                renderingAsyncTask.removeAllTasks();
-            }
             PDFView.this.recycle();
             PDFView.this.setOnDrawListener(onDrawListener);
             PDFView.this.setOnPageChangeListener(onPageChangeListener);
