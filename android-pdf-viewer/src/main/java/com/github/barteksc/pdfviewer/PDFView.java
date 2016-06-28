@@ -915,7 +915,7 @@ public class PDFView extends SurfaceView {
      * considering the area width and height
      */
     private void calculateOptimalWidthAndHeight(boolean widthCheckRequired) {
-        if (state == State.DEFAULT || (!widthCheckRequired || getWidth() == 0)) {
+        if (state == State.DEFAULT || (widthCheckRequired && getWidth() == 0)) {
             return;
         }
 
