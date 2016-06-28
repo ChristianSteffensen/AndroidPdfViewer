@@ -327,7 +327,7 @@ public class PDFView extends SurfaceView {
         this.pageWidth = pdfiumCore.getPageWidth(pdfDocument, 0);
         this.pageHeight = pdfiumCore.getPageHeight(pdfDocument, 0);
         state = State.LOADED;
-        calculateOptimalWidthAndHeight();
+        calculateOptimalWidthAndHeight(false);
 
         renderingAsyncTask = new RenderingAsyncTask(this, pdfiumCore, pdfDocument);
         renderingAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -480,7 +480,7 @@ public class PDFView extends SurfaceView {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         animationManager.stopAll();
-        calculateOptimalWidthAndHeight();
+        calculateOptimalWidthAndHeight(true);
         loadPages();
         if (swipeVertical)
             moveTo(currentXOffset, calculateCenterOffsetForPage(currentFilteredPage));
@@ -824,7 +824,7 @@ public class PDFView extends SurfaceView {
         this.pageWidth = pdfiumCore.getPageWidth(pdfDocument, 0);
         this.pageHeight = pdfiumCore.getPageHeight(pdfDocument, 0);
         state = State.LOADED;
-        calculateOptimalWidthAndHeight();
+        calculateOptimalWidthAndHeight(true);
 
         renderingAsyncTask = new RenderingAsyncTask(this, pdfiumCore, pdfDocument);
         renderingAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -914,8 +914,8 @@ public class PDFView extends SurfaceView {
      * Calculate the optimal width and height of a page
      * considering the area width and height
      */
-    private void calculateOptimalWidthAndHeight() {
-        if (state == State.DEFAULT || getWidth() == 0) {
+    private void calculateOptimalWidthAndHeight(boolean widthCheckRequired) {
+        if (state == State.DEFAULT || (!widthCheckRequired || getWidth() == 0)) {
             return;
         }
 
