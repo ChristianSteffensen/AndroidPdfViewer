@@ -19,7 +19,9 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
+import android.support.annotation.Nullable;
 
+import com.github.barteksc.pdfviewer.listener.CustomLoadCompleteListener;
 import com.github.barteksc.pdfviewer.util.FileUtils;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
@@ -42,13 +44,15 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
     private Context context;
     private PdfiumCore pdfiumCore;
     private PdfDocument pdfDocument;
+    private CustomLoadCompleteListener customLoadCompleteListener;
 
-    public DecodingAsyncTask(String path, boolean isAsset, PDFView pdfView, PdfiumCore pdfiumCore) {
+    public DecodingAsyncTask(String path, boolean isAsset, PDFView pdfView, PdfiumCore pdfiumCore, @Nullable CustomLoadCompleteListener listener) {
         this.cancelled = false;
         this.pdfView = pdfView;
         this.isAsset = isAsset;
         this.pdfiumCore = pdfiumCore;
         this.path = path;
+        this.customLoadCompleteListener = listener;
         context = pdfView.getContext();
     }
 
@@ -91,7 +95,12 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
             return;
         }
         if (!cancelled) {
-            pdfView.loadComplete(pdfDocument);
+            if(customLoadCompleteListener == null){
+                pdfView.loadComplete(pdfDocument);
+            }else{
+                customLoadCompleteListener.loadComplete(pdfDocument);
+            }
+
         }
     }
 

@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 
 import com.github.barteksc.pdfviewer.exception.FileNotFoundException;
+import com.github.barteksc.pdfviewer.listener.CustomLoadCompleteListener;
 import com.github.barteksc.pdfviewer.listener.OnDrawListener;
 import com.github.barteksc.pdfviewer.listener.OnErrorListener;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
@@ -305,6 +306,49 @@ public class PDFView extends SurfaceView {
         this.thumbnailListener = thumbnailListener;
     }
 
+    public void getBitmap(String path) {
+        decodingAsyncTask = new DecodingAsyncTask(path, false, this, pdfiumCore, new CustomLoadCompleteListener() {
+            @Override
+            public void loadComplete(PdfDocument document) {
+                renderBitmap(document);
+            }
+        });
+        decodingAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void renderBitmap(PdfDocument pdfDocument) {
+
+        this.documentPageCount = pdfiumCore.getPageCount(pdfDocument);
+
+        this.pdfDocument = pdfDocument;
+        pdfiumCore.openPage(pdfDocument, 0);
+
+        openedPages.add(0);
+        this.pageWidth = pdfiumCore.getPageWidth(pdfDocument, 0);
+        this.pageHeight = pdfiumCore.getPageHeight(pdfDocument, 0);
+        state = State.LOADED;
+        calculateOptimalWidthAndHeight();
+
+        renderingAsyncTask = new RenderingAsyncTask(this, pdfiumCore, pdfDocument);
+        renderingAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        renderingAsyncTask.addRenderingTask(1, 1,
+                (int) (optimalPageWidth * Constants.THUMBNAIL_RATIO),
+                (int) (optimalPageHeight * Constants.THUMBNAIL_RATIO),
+                new RectF(0, 0, 1, 1), true, 0, bestQuality);
+
+//        if (scrollBar != null) {
+//            scrollBar.pdfLoaded();
+//        }
+//
+//        // Notify the listener
+//        jumpTo(defaultPage);
+//        if (onLoadCompleteListener != null) {
+//            onLoadCompleteListener.loadComplete(documentPageCount);
+//        }
+
+    }
+
     private void load(String path, boolean isAsset, OnLoadCompleteListener listener, OnErrorListener onErrorListener) {
         load(path, isAsset, listener, onErrorListener, null);
     }
@@ -326,7 +370,7 @@ public class PDFView extends SurfaceView {
         this.onErrorListener = onErrorListener;
 
         // Start decoding document
-        decodingAsyncTask = new DecodingAsyncTask(path, isAsset, this, pdfiumCore);
+        decodingAsyncTask = new DecodingAsyncTask(path, isAsset, this, pdfiumCore, null);
         decodingAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 
@@ -813,7 +857,7 @@ public class PDFView extends SurfaceView {
     public void onBitmapRendered(PagePart part) {
         if (part.isThumbnail()) {
             cacheManager.cacheThumbnail(part);
-            if(thumbnailListener != null){
+            if (thumbnailListener != null) {
                 thumbnailListener.thumbnailReady(part.getRenderedBitmap());
             }
         } else {
