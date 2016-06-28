@@ -15,10 +15,8 @@
  */
 package com.github.barteksc.pdfviewer.listener;
 
-import com.github.barteksc.pdfviewer.PDFView;
 import com.shockwave.pdfium.PdfDocument;
 
-private interface CustomLoadCompleteListener {
-
+public interface CustomLoadCompleteListener {
     void loadComplete(PdfDocument document);
 }
