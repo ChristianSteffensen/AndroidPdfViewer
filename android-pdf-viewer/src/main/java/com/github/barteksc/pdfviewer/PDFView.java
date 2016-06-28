@@ -34,6 +34,7 @@ import com.github.barteksc.pdfviewer.listener.OnDrawListener;
 import com.github.barteksc.pdfviewer.listener.OnErrorListener;
 import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
 import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
+import com.github.barteksc.pdfviewer.listener.ThumbnailListener;
 import com.github.barteksc.pdfviewer.model.PagePart;
 import com.github.barteksc.pdfviewer.util.ArrayUtils;
 import com.github.barteksc.pdfviewer.util.Constants;
@@ -268,6 +269,7 @@ public class PDFView extends SurfaceView {
      * Storing already opened pages. Used form optimizing Pdfium calls
      */
     private List<Integer> openedPages = new ArrayList<>();
+    private ThumbnailListener thumbnailListener;
 
     /**
      * Construct the initial view
@@ -297,6 +299,10 @@ public class PDFView extends SurfaceView {
         setWillNotDraw(false);
 
         pdfiumCore = new PdfiumCore(context);
+    }
+
+    public void setThumbnailListener(ThumbnailListener thumbnailListener) {
+        this.thumbnailListener = thumbnailListener;
     }
 
     private void load(String path, boolean isAsset, OnLoadCompleteListener listener, OnErrorListener onErrorListener) {
@@ -395,7 +401,6 @@ public class PDFView extends SurfaceView {
     }
 
     public void recycle() {
-
         // Stop tasks
         if (renderingAsyncTask != null) {
             renderingAsyncTask.cancel(true);
@@ -770,6 +775,7 @@ public class PDFView extends SurfaceView {
         // We assume all the pages are the same size
         this.pdfDocument = pdfDocument;
         pdfiumCore.openPage(pdfDocument, 0);
+
         openedPages.add(0);
         this.pageWidth = pdfiumCore.getPageWidth(pdfDocument, 0);
         this.pageHeight = pdfiumCore.getPageHeight(pdfDocument, 0);
@@ -807,6 +813,9 @@ public class PDFView extends SurfaceView {
     public void onBitmapRendered(PagePart part) {
         if (part.isThumbnail()) {
             cacheManager.cacheThumbnail(part);
+            if(thumbnailListener != null){
+                thumbnailListener.thumbnailReady(part.getRenderedBitmap());
+            }
         } else {
             cacheManager.cachePart(part);
         }
