@@ -341,10 +341,10 @@ public class PDFView extends SurfaceView {
                 documentPage = filteredUserPages[1];
             }
         }
-        final int documentPageFinal = documentPage;
-        if (documentPage < 0 || 1 >= documentPageCount) {
-            return;
-        }
+//        final int documentPageFinal = documentPage;
+//        if (documentPage < 0 || 1 >= documentPageCount) {
+//            return;
+//        }
 
         if (!openedPages.contains(documentPage)) {
             openedPages.add(documentPage);
@@ -363,7 +363,7 @@ public class PDFView extends SurfaceView {
         }
 
 
-       
+
 
 //        if (scrollBar != null) {
 //            scrollBar.pdfLoaded();
