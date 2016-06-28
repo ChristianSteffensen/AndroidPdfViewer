@@ -332,10 +332,38 @@ public class PDFView extends SurfaceView {
         renderingAsyncTask = new RenderingAsyncTask(this, pdfiumCore, pdfDocument);
         renderingAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        renderingAsyncTask.addRenderingTask(1, 1,
-                (int) (optimalPageWidth * Constants.THUMBNAIL_RATIO),
-                (int) (optimalPageHeight * Constants.THUMBNAIL_RATIO),
-                new RectF(0, 0, 1, 1), true, 0, bestQuality);
+        // Finds the document page associated with the given userPage
+        int documentPage = 1;
+        if (filteredUserPages != null) {
+            if (1 >= filteredUserPages.length) {
+                return;
+            } else {
+                documentPage = filteredUserPages[1];
+            }
+        }
+        final int documentPageFinal = documentPage;
+        if (documentPage < 0 || 1 >= documentPageCount) {
+            return;
+        }
+
+        if (!openedPages.contains(documentPage)) {
+            openedPages.add(documentPage);
+            pdfiumCore.openPage(pdfDocument, documentPage);
+        }
+
+        // Render thumbnail of the page
+        if (!cacheManager.containsThumbnail(1, documentPage, //
+                (int) (optimalPageWidth * Constants.THUMBNAIL_RATIO), //
+                (int) (optimalPageHeight * Constants.THUMBNAIL_RATIO), //
+                new RectF(0, 0, 1, 1))) {
+            renderingAsyncTask.addRenderingTask(1, documentPage, //
+                    (int) (optimalPageWidth * Constants.THUMBNAIL_RATIO), //
+                    (int) (optimalPageHeight * Constants.THUMBNAIL_RATIO), //
+                    new RectF(0, 0, 1, 1), true, 0, bestQuality);
+        }
+
+
+       
 
 //        if (scrollBar != null) {
 //            scrollBar.pdfLoaded();
